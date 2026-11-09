@@ -23,7 +23,7 @@ UNION ALL SELECT 2, id FROM permissions WHERE slug IN ('content.manage','message
 UNION ALL SELECT 3, id FROM permissions WHERE slug IN ('messages.view','applications.view');
 
 INSERT INTO users (name, email, password, role_id, status) VALUES
-('SLGTI Administrator', 'admin@slgti.ac.lk', '$2y$10$zCb9prSU1RgoF1cV8Em4juTM6GyzIoiqTkQYldx46ZneFh39J5n9q', 1, 'active');
+('SLGTI Administrator', 'admin@slgti.ac.lk', '$2y$12$VTS6tXOOCeWyUSxbWwuPr.jB4levXkMS1roLGdIWgxYXm/z/utcme', 1, 'active');
 
 INSERT INTO departments (id, name, slug, summary, description, facilities, image, icon, head_name, email, phone, sort_order, status) VALUES
 (1, 'Automotive & Agricultural Technology', 'automotive-agricultural-technology',
@@ -415,11 +415,11 @@ SELECT 8, id FROM permissions WHERE slug IN ('gallery.manage','media.manage');
 INSERT INTO user_roles (user_id, role_id) SELECT id, role_id FROM users;
 
 INSERT INTO users (name, email, password, role_id, department_id, status)
-SELECT 'News Editor', 'news@slgti.ac.lk', '$2y$10$zCb9prSU1RgoF1cV8Em4juTM6GyzIoiqTkQYldx46ZneFh39J5n9q', id, NULL, 'active'
+SELECT 'News Editor', 'news@slgti.ac.lk', '$2y$12$VTS6tXOOCeWyUSxbWwuPr.jB4levXkMS1roLGdIWgxYXm/z/utcme', id, NULL, 'active'
 FROM roles WHERE slug = 'news_editor';
 
 INSERT INTO users (name, email, password, role_id, department_id, status)
-SELECT 'ICT Department Manager', 'ict@slgti.ac.lk', '$2y$10$zCb9prSU1RgoF1cV8Em4juTM6GyzIoiqTkQYldx46ZneFh39J5n9q', r.id, d.id, 'active'
+SELECT 'ICT Department Manager', 'ict@slgti.ac.lk', '$2y$12$VTS6tXOOCeWyUSxbWwuPr.jB4levXkMS1roLGdIWgxYXm/z/utcme', r.id, d.id, 'active'
 FROM roles r JOIN departments d ON d.slug = 'information-communication-technology'
 WHERE r.slug = 'department_manager';
 

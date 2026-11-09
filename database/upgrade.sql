@@ -78,12 +78,12 @@ INSERT IGNORE INTO user_roles (user_id, role_id)
 SELECT id, role_id FROM users;
 
 INSERT INTO users (name, email, password, role_id, department_id, status)
-SELECT 'News Editor', 'news@slgti.ac.lk', '$2y$10$zCb9prSU1RgoF1cV8Em4juTM6GyzIoiqTkQYldx46ZneFh39J5n9q', r.id, NULL, 'active'
+SELECT 'News Editor', 'news@slgti.ac.lk', '$2y$12$VTS6tXOOCeWyUSxbWwuPr.jB4levXkMS1roLGdIWgxYXm/z/utcme', r.id, NULL, 'active'
 FROM roles r WHERE r.slug = 'news_editor'
 AND NOT EXISTS (SELECT 1 FROM users WHERE email = 'news@slgti.ac.lk');
 
 INSERT INTO users (name, email, password, role_id, department_id, status)
-SELECT 'ICT Department Manager', 'ict@slgti.ac.lk', '$2y$10$zCb9prSU1RgoF1cV8Em4juTM6GyzIoiqTkQYldx46ZneFh39J5n9q', r.id, d.id, 'active'
+SELECT 'ICT Department Manager', 'ict@slgti.ac.lk', '$2y$12$VTS6tXOOCeWyUSxbWwuPr.jB4levXkMS1roLGdIWgxYXm/z/utcme', r.id, d.id, 'active'
 FROM roles r JOIN departments d ON d.slug = 'information-communication-technology'
 WHERE r.slug = 'department_manager'
 AND NOT EXISTS (SELECT 1 FROM users WHERE email = 'ict@slgti.ac.lk');
