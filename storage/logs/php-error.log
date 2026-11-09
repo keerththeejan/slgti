@@ -1,0 +1,2 @@
+[2026-11-06T15:33:14+05:30] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'name' in 'field list' in C:\wamp64\www\slgti\app\Core\Model.php:13
+[2026-11-06T15:33:21+05:30] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'name' in 'field list' in C:\wamp64\www\slgti\app\Core\Model.php:13

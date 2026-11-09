@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 72" role="img" aria-label="SLGTI">
+  <text x="0" y="40" font-family="Arial Black, Arial, sans-serif" font-size="42" font-weight="800" fill="#FFFFFF">SLG</text>
+  <text x="84" y="40" font-family="Arial Black, Arial, sans-serif" font-size="42" font-weight="800" fill="#EF233C">T</text>
+  <text x="112" y="40" font-family="Arial Black, Arial, sans-serif" font-size="42" font-weight="800" fill="#FFFFFF">I</text>
+  <circle cx="128" cy="12" r="4.5" fill="#EF233C"/>
+  <text x="158" y="18" font-family="Arial, sans-serif" font-size="9" font-weight="700" fill="#FFFFFF" letter-spacing="0.6">SRI LANKA</text>
+  <text x="158" y="30" font-family="Arial, sans-serif" font-size="9" font-weight="700" fill="#FF8A98" letter-spacing="0.6">GERMAN</text>
+  <text x="158" y="42" font-family="Arial, sans-serif" font-size="9" font-weight="700" fill="#FFFFFF" letter-spacing="0.6">TRAINING</text>
+  <text x="158" y="54" font-family="Arial, sans-serif" font-size="9" font-weight="700" fill="#FFFFFF" letter-spacing="0.6">INSTITUTE</text>
+</svg>
