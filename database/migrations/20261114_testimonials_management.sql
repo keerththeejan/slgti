@@ -1,0 +1,36 @@
+ALTER TABLE testimonials
+    ADD COLUMN slug VARCHAR(180) NULL AFTER name,
+    ADD COLUMN profile_image VARCHAR(255) NULL AFTER quote,
+    ADD COLUMN image_alt VARCHAR(180) NULL AFTER profile_image,
+    ADD COLUMN designation VARCHAR(180) NULL AFTER role,
+    ADD COLUMN department_id INT UNSIGNED NULL AFTER designation,
+    ADD COLUMN programme_id INT UNSIGNED NULL AFTER department_id,
+    ADD COLUMN qualification VARCHAR(180) NULL AFTER programme_id,
+    ADD COLUMN graduation_year SMALLINT UNSIGNED NULL AFTER qualification,
+    ADD COLUMN organization VARCHAR(180) NULL AFTER graduation_year,
+    ADD COLUMN rating TINYINT UNSIGNED NULL AFTER organization,
+    ADD COLUMN approval_status VARCHAR(20) NOT NULL DEFAULT 'pending' AFTER rating,
+    ADD COLUMN rejection_reason VARCHAR(500) NULL AFTER approval_status,
+    ADD COLUMN is_featured TINYINT(1) NOT NULL DEFAULT 0 AFTER rejection_reason,
+    ADD COLUMN display_location VARCHAR(40) NOT NULL DEFAULT 'homepage' AFTER is_featured,
+    ADD COLUMN created_at DATETIME NULL AFTER status,
+    ADD COLUMN updated_at DATETIME NULL AFTER created_at,
+    ADD COLUMN seo_title VARCHAR(180) NULL AFTER updated_at,
+    ADD COLUMN meta_description VARCHAR(320) NULL AFTER seo_title,
+    ADD COLUMN canonical_url VARCHAR(255) NULL AFTER meta_description,
+    ADD COLUMN og_title VARCHAR(180) NULL AFTER canonical_url,
+    ADD COLUMN og_description VARCHAR(320) NULL AFTER og_title,
+    ADD COLUMN og_image VARCHAR(255) NULL AFTER og_description,
+    ADD COLUMN robots_index VARCHAR(20) NOT NULL DEFAULT 'noindex' AFTER og_image,
+    ADD COLUMN robots_follow VARCHAR(20) NOT NULL DEFAULT 'follow' AFTER robots_index,
+    ADD INDEX idx_testimonials_listing (status, approval_status, display_location, sort_order);
+
+UPDATE testimonials
+SET slug = CONCAT('testimonial-', id),
+    approval_status = CASE WHEN status = 'published' THEN 'approved' ELSE 'pending' END,
+    created_at = COALESCE(created_at, NOW()),
+    updated_at = NOW(),
+    seo_title = CONCAT(name, ' | SLGTI'),
+    meta_description = LEFT(quote, 320),
+    display_location = 'both'
+WHERE slug IS NULL OR slug = '';

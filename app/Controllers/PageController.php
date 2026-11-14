@@ -15,9 +15,9 @@ final class PageController
         $staff = Model::fetchAll(
             "SELECT s.*, d.name AS department_name FROM staff s
              LEFT JOIN departments d ON d.id = s.department_id
-             WHERE s.status = 'published' ORDER BY s.sort_order ASC"
+             WHERE s.status = 'published' AND s.display_location IN ('directory', 'both') ORDER BY s.sort_order ASC, s.id ASC"
         );
-        $facilities = Model::fetchAll("SELECT * FROM facilities WHERE status = 'published' ORDER BY sort_order ASC");
+        $facilities = Model::fetchAll("SELECT * FROM facilities WHERE status = 'published' AND display_location IN ('facilities', 'both') ORDER BY sort_order ASC, id ASC");
         view('pages/about', [
             'page' => $page,
             'principal' => $principal,
@@ -36,7 +36,7 @@ final class PageController
              WHERE n.status = 'published' AND c.slug = 'admission'
              ORDER BY n.published_at DESC LIMIT 6"
         );
-        $levels = Model::fetchAll('SELECT * FROM programme_levels ORDER BY sort_order ASC');
+        $levels = Model::fetchAll("SELECT * FROM programme_levels WHERE status = 'published' ORDER BY sort_order ASC");
         view('pages/admissions', [
             'announcements' => $announcements,
             'levels' => $levels,
@@ -56,11 +56,36 @@ final class PageController
 
     public function faq(): void
     {
-        $faqs = Model::fetchAll("SELECT * FROM faqs WHERE status = 'published' ORDER BY sort_order ASC");
+        $q = trim((string) ($_GET['q'] ?? ''));
+        $category = trim((string) ($_GET['category'] ?? ''));
+        $where = ["status = 'published'"];
+        $params = [];
+        if ($q !== '') {
+            $where[] = '(question LIKE ? OR answer LIKE ?)';
+            array_push($params, '%' . $q . '%', '%' . $q . '%');
+        }
+        if ($category !== '') {
+            $where[] = 'category = ?';
+            $params[] = $category;
+        }
+        $faqs = Model::fetchAll('SELECT * FROM faqs WHERE ' . implode(' AND ', $where) . ' ORDER BY sort_order ASC, id ASC', $params);
+        $faqSchema = [];
+        foreach ($faqs as $faq) {
+            $faqSchema[] = [
+                '@type' => 'Question',
+                'name' => $faq['question'],
+                'acceptedAnswer' => ['@type' => 'Answer', 'text' => strip_tags($faq['answer'])],
+            ];
+        }
         view('pages/faq', [
             'faqs' => $faqs,
+            'q' => $q,
+            'category' => $category,
+            'categories' => Model::fetchAll("SELECT DISTINCT category FROM faqs WHERE status = 'published' AND category IS NOT NULL AND category <> '' ORDER BY category ASC"),
             'metaTitle' => 'FAQ | SLGTI',
             'metaDescription' => 'Answers to common questions about admissions, programmes and student life at SLGTI.',
+            'metaCanonical' => absolute_url('faq'),
+            'structuredData' => ['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => $faqSchema],
         ]);
     }
 
@@ -99,14 +124,38 @@ final class PageController
 
     public function show(string $slug): void
     {
-        $page = Model::fetch("SELECT * FROM pages WHERE slug = ? AND status = 'published'", [$slug]);
+        $page = Model::fetch(
+            "SELECT p.*, parent.title AS parent_title, parent.slug AS parent_slug
+             FROM pages p LEFT JOIN pages parent ON parent.id = p.parent_id
+             WHERE p.slug = ? AND p.status = 'published'",
+            [$slug]
+        );
         if (!$page) {
             abort(404);
         }
+        $children = Model::fetchAll(
+            "SELECT title, slug, excerpt FROM pages WHERE parent_id = ? AND status = 'published' ORDER BY sort_order ASC, id ASC",
+            [$page['id']]
+        );
+        $structuredData = [
+            '@context' => 'https://schema.org',
+            '@type' => 'WebPage',
+            'name' => $page['title'],
+            'url' => $page['canonical_url'] ?: absolute_url('page/' . $page['slug']),
+            'description' => $page['meta_description'] ?: excerpt($page['excerpt'] ?: $page['body']),
+        ];
         view('pages/simple', [
             'page' => $page,
+            'children' => $children,
             'metaTitle' => $page['meta_title'] ?: $page['title'],
             'metaDescription' => $page['meta_description'] ?: excerpt($page['excerpt'] ?: $page['body']),
+            'metaCanonical' => $page['canonical_url'] ?: absolute_url('page/' . $page['slug']),
+            'metaImage' => $page['og_image'] ? media_url($page['og_image']) : ($page['image'] ? media_url($page['image']) : absolute_url('assets/images/hero-1.jpg')),
+            'metaTwitterImage' => $page['twitter_image'] ? media_url($page['twitter_image']) : null,
+            'metaOgTitle' => $page['og_title'] ?: ($page['meta_title'] ?: $page['title']),
+            'metaOgDescription' => $page['og_description'] ?: ($page['meta_description'] ?: excerpt($page['excerpt'] ?: $page['body'])),
+            'metaRobots' => ($page['robots_index'] ?: 'index') . ', ' . ($page['robots_follow'] ?: 'follow'),
+            'structuredData' => $structuredData,
         ]);
     }
 

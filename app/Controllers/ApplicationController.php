@@ -16,6 +16,7 @@ final class ApplicationController
         view('applications/create', [
             'departments' => Model::fetchAll("SELECT id, name FROM departments WHERE status = 'published' ORDER BY sort_order"),
             'programmes' => Model::fetchAll("SELECT id, title, department_id FROM programmes WHERE status = 'published' ORDER BY title"),
+            'applicationFunctions' => Model::fetchAll("SELECT * FROM application_functions WHERE status = 'active' AND publication_status = 'published' AND external_url IS NOT NULL AND external_url <> '' ORDER BY sort_order ASC, id ASC"),
             'metaTitle' => 'Apply Now | SLGTI',
             'metaDescription' => 'Submit an application for an NVQ programme at the Sri Lanka German Training Institute.',
         ]);

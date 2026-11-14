@@ -1,2 +1,4 @@
 [2026-11-06T15:33:14+05:30] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'name' in 'field list' in C:\wamp64\www\slgti\app\Core\Model.php:13
 [2026-11-06T15:33:21+05:30] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'name' in 'field list' in C:\wamp64\www\slgti\app\Core\Model.php:13
+[2026-11-14T13:19:16+05:30] syntax error, unexpected token "private" in C:\wamp64\www\slgti\app\Controllers\Admin\ResourceController.php:80
+[2026-11-14T14:29:57+05:30] View not found: admin/pages/index in C:\wamp64\www\slgti\app\Helpers\functions.php:288

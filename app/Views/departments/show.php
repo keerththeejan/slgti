@@ -1,4 +1,5 @@
 <?php $title = $department['name']; $lead = $department['summary']; require APP_PATH . '/Views/partials/page-hero.php'; ?>
+<nav class="container breadcrumb-nav" aria-label="Breadcrumb"><a href="<?= e(url('/')) ?>">Home</a><span aria-hidden="true">/</span><a href="<?= e(url('departments')) ?>">Departments</a><span aria-hidden="true">/</span><span><?= e($department['name']) ?></span></nav>
 <section class="section">
     <div class="container prose-grid">
         <article>
@@ -18,6 +19,7 @@
         </aside>
     </div>
     <div class="container">
+        <?php if (!empty($requirements)): ?><h2>Admissions requirements</h2><ul class="link-list"><?php foreach ($requirements as $requirement): ?><li><a href="<?= e(url('requirements/' . $requirement['slug'])) ?>"><?= e($requirement['requirement']) ?><small><?= e($requirement['short_description']) ?></small></a></li><?php endforeach; ?></ul><?php endif; ?>
         <h2>Programmes</h2>
         <div class="table-wrap">
             <table>
@@ -28,7 +30,7 @@
                         <td><?= e($programme['title']) ?></td>
                         <td><?= e($programme['level_code']) ?></td>
                         <td><?= e($programme['duration']) ?></td>
-                        <td><a href="<?= e(url('programmes/' . $programme['slug'])) ?>">Details</a></td>
+                        <td><a href="<?= e(url('programmes/' . ($programme['seo_slug'] ?: $programme['slug']))) ?>">Details</a></td>
                     </tr>
                 <?php endforeach; ?>
                 <?php if (!$programmes): ?><tr><td colspan="4">Programmes will be published soon.</td></tr><?php endif; ?>

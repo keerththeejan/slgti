@@ -1,0 +1,36 @@
+ALTER TABLE staff
+    ADD COLUMN slug VARCHAR(180) NULL AFTER name,
+    ADD COLUMN staff_id VARCHAR(60) NULL AFTER slug,
+    ADD COLUMN category VARCHAR(80) NULL AFTER position,
+    ADD COLUMN section VARCHAR(120) NULL AFTER category,
+    ADD COLUMN qualifications TEXT NULL AFTER bio,
+    ADD COLUMN expertise TEXT NULL AFTER qualifications,
+    ADD COLUMN employment_status VARCHAR(30) NOT NULL DEFAULT 'active' AFTER expertise,
+    ADD COLUMN joining_date DATE NULL AFTER employment_status,
+    ADD COLUMN office_location VARCHAR(180) NULL AFTER phone,
+    ADD COLUMN profile_url VARCHAR(255) NULL AFTER office_location,
+    ADD COLUMN image_alt VARCHAR(180) NULL AFTER image,
+    ADD COLUMN is_featured TINYINT(1) NOT NULL DEFAULT 0 AFTER image_alt,
+    ADD COLUMN display_location VARCHAR(40) NOT NULL DEFAULT 'directory' AFTER is_featured,
+    ADD COLUMN updated_at DATETIME NULL AFTER created_at,
+    ADD COLUMN seo_title VARCHAR(180) NULL AFTER updated_at,
+    ADD COLUMN meta_description VARCHAR(320) NULL AFTER seo_title,
+    ADD COLUMN canonical_url VARCHAR(255) NULL AFTER meta_description,
+    ADD COLUMN og_title VARCHAR(180) NULL AFTER canonical_url,
+    ADD COLUMN og_description VARCHAR(320) NULL AFTER og_title,
+    ADD COLUMN og_image VARCHAR(255) NULL AFTER og_description,
+    ADD COLUMN robots_index VARCHAR(20) NOT NULL DEFAULT 'noindex' AFTER og_image,
+    ADD COLUMN robots_follow VARCHAR(20) NOT NULL DEFAULT 'follow' AFTER robots_index,
+    ADD INDEX idx_staff_listing (status, department_id, sort_order);
+
+UPDATE staff
+SET slug = CONCAT('staff-', id),
+    staff_id = CONCAT('SLGTI-', LPAD(id, 4, '0')),
+    category = 'Staff',
+    image_alt = name,
+    display_location = 'both',
+    created_at = COALESCE(created_at, NOW()),
+    updated_at = NOW(),
+    seo_title = CONCAT(name, ' | SLGTI'),
+    meta_description = LEFT(COALESCE(bio, CONCAT(position, ' at SLGTI')), 320)
+WHERE slug IS NULL OR slug = '';

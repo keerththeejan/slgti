@@ -12,13 +12,13 @@
     <div class="container programme-grid">
         <?php foreach ($programmes as $programme): ?>
             <article class="programme-card">
-                <img src="<?= e(media_url($programme['image'])) ?>" alt="" loading="lazy" width="640" height="400">
+                <img src="<?= e(media_url($programme['image'])) ?>" alt="<?= e($programme['title']) ?>" loading="lazy" width="640" height="400">
                 <div>
                     <p class="badge"><?= e($programme['level_code']) ?> · <?= e($programme['qualification']) ?></p>
                     <h2><?= e($programme['title']) ?></h2>
                     <p><?= e($programme['summary']) ?></p>
                     <ul><li><i class="bi bi-clock"></i> <?= e($programme['duration']) ?></li><li><i class="bi bi-building"></i> <?= e($programme['department_name']) ?></li></ul>
-                    <a class="btn btn-navy" href="<?= e(url('programmes/' . $programme['slug'])) ?>">View details</a>
+                    <a class="btn btn-navy" href="<?= e(url('programmes/' . ($programme['seo_slug'] ?: $programme['slug']))) ?>">View details</a>
                 </div>
             </article>
         <?php endforeach; ?>

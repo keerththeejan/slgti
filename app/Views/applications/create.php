@@ -1,6 +1,7 @@
 <?php $title = 'Apply now'; $lead = 'Online application for the next SLGTI intake.'; require APP_PATH . '/Views/partials/page-hero.php'; ?>
 <section class="section">
     <div class="container">
+        <?php if (!empty($applicationFunctions)): ?><section class="public-application-functions" aria-labelledby="application-services-title"><div class="section-heading"><p class="eyebrow">Official services</p><h2 id="application-services-title">Choose an application service</h2><p>Use the official external service that matches your request.</p></div><div class="public-application-grid"><?php foreach ($applicationFunctions as $function): ?><a class="public-application-card" href="<?= e($function['external_url']) ?>"<?= $function['open_new_tab'] ? ' target="_blank" rel="noopener noreferrer"' : '' ?>><span class="public-application-icon"><i class="bi <?= e($function['icon']) ?>" aria-hidden="true"></i></span><span><strong><?= e($function['name']) ?></strong><small><?= $function['description'] ?: e($function['application_type']) ?></small></span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></a><?php endforeach; ?></div></section><?php endif; ?>
         <?php if (settings('apply_open', '1') !== '1'): ?>
             <p class="alert alert-warning">Online applications are currently closed.</p>
         <?php else: ?>

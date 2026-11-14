@@ -4,6 +4,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggle = document.querySelector('[data-admin-nav]');
     const overlay = document.querySelector('[data-admin-overlay]');
     const desktop = () => window.matchMedia('(min-width: 1200px)').matches;
+    const collapseToggle = document.querySelector('[data-admin-collapse]');
+    const collapsed = window.localStorage.getItem('slgti-admin-sidebar') === 'collapsed';
+    if (collapsed && desktop()) body.classList.add('sidebar-collapsed');
+    collapseToggle?.addEventListener('click', () => {
+        body.classList.toggle('sidebar-collapsed');
+        window.localStorage.setItem('slgti-admin-sidebar', body.classList.contains('sidebar-collapsed') ? 'collapsed' : 'expanded');
+    });
 
     const setNav = (open) => {
         if (!side) return;
@@ -80,6 +87,22 @@ document.addEventListener('DOMContentLoaded', () => {
             content_style: 'img { max-width: 100%; height: auto; }',
         });
     }
+
+    document.querySelectorAll('input[type="file"][accept*="image"]').forEach((input) => {
+        input.addEventListener('change', () => {
+            const file = input.files?.[0];
+            if (!file || !file.type.startsWith('image/')) return;
+            let preview = input.parentElement?.querySelector('[data-upload-preview]');
+            if (!preview) {
+                preview = document.createElement('img');
+                preview.dataset.uploadPreview = '1';
+                preview.className = 'thumb';
+                preview.alt = 'Selected image preview';
+                input.parentElement?.insertBefore(preview, input);
+            }
+            preview.src = URL.createObjectURL(file);
+        });
+    });
 
     document.querySelectorAll('form').forEach((form) => {
         form.addEventListener('submit', () => {

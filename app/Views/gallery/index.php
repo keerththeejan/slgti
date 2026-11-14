@@ -13,10 +13,11 @@
             <button class="btn btn-navy" type="submit">Search</button>
         </form>
     </div>
+    <div class="container gallery-albums"><?php foreach ($albums as $album): ?><a class="gallery-album-card" href="<?= e(url('gallery/' . $album['slug'])) ?>"><?php if ($album['cover']): ?><img src="<?= e(media_url($album['cover'])) ?>" alt="<?= e($album['title']) ?>" loading="lazy" width="320" height="180"><?php endif; ?><strong><?= e($album['title']) ?></strong><small><?= (int) $album['image_count'] ?> photographs</small></a><?php endforeach; ?></div>
     <div class="container masonry" id="galleryGrid">
         <?php foreach ($images as $image): ?>
             <button type="button" class="shot" data-full="<?= e(media_url($image['image'])) ?>" data-caption="<?= e($image['title']) ?>">
-                <img src="<?= e(media_url($image['image'])) ?>" alt="<?= e($image['title']) ?>" loading="lazy" width="700" height="480">
+                <img src="<?= e(media_url($image['image'])) ?>" alt="<?= e($image['alt_text'] ?: $image['title']) ?>" loading="lazy" width="700" height="480">
             </button>
         <?php endforeach; ?>
     </div>
@@ -25,15 +26,10 @@
         <h2>Videos</h2>
         <div class="video-grid">
             <?php foreach ($videos as $video): ?>
-                <?php $youtube = youtube_id($video['video_url']); ?>
-                <article>
-                    <h3><?= e($video['title']) ?></h3>
-                    <p><?= e($video['description']) ?></p>
-                    <?php if ($youtube): ?>
-                        <iframe loading="lazy" title="<?= e($video['title']) ?>" src="https://www.youtube-nocookie.com/embed/<?= e($youtube) ?>" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    <?php else: ?>
-                        <p><a href="<?= e($video['video_url']) ?>" target="_blank" rel="noopener">Watch video</a></p>
-                    <?php endif; ?>
+                <?php $thumbnail = $video['thumbnail'] ? media_url($video['thumbnail']) : (($video['provider'] === 'youtube' && $video['video_id']) ? 'https://i.ytimg.com/vi/' . rawurlencode($video['video_id']) . '/hqdefault.jpg' : asset('images/placeholder.svg')); ?>
+                <article class="video-card">
+                    <a class="video-card-media" href="<?= e(url('videos/' . $video['slug'])) ?>"><img src="<?= e($thumbnail) ?>" alt="<?= e($video['title']) ?>" loading="lazy" width="640" height="360"><span class="video-play"><i class="bi bi-play-fill"></i></span></a>
+                    <div class="video-card-body"><h3><a href="<?= e(url('videos/' . $video['slug'])) ?>"><?= e($video['title']) ?></a></h3><p><?= e(excerpt($video['description'] ?? '', 130)) ?></p></div>
                 </article>
             <?php endforeach; ?>
         </div>

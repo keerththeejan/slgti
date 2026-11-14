@@ -1,18 +1,53 @@
 <div class="stat-grid">
-    <article><i class="bi bi-newspaper stat-icon" aria-hidden="true"></i><span>Published news</span><strong><?= (int) $counts['news'] ?></strong></article>
-    <article><i class="bi bi-building stat-icon" aria-hidden="true"></i><span>Departments</span><strong><?= (int) $counts['departments'] ?></strong></article>
-    <article><i class="bi bi-images stat-icon" aria-hidden="true"></i><span>Gallery albums</span><strong><?= (int) $counts['albums'] ?></strong></article>
-    <article><i class="bi bi-people stat-icon" aria-hidden="true"></i><span>Staff profiles</span><strong><?= (int) $counts['staff'] ?></strong></article>
-    <article><i class="bi bi-calendar-event stat-icon" aria-hidden="true"></i><span>Upcoming content</span><strong><?= (int) $counts['events'] ?></strong></article>
-    <article><i class="bi bi-mortarboard stat-icon" aria-hidden="true"></i><span>Programmes</span><strong><?= (int) $counts['programmes'] ?></strong></article>
-    <article><i class="bi bi-file-earmark-text stat-icon" aria-hidden="true"></i><span>Applications</span><strong><?= (int) $counts['applications'] ?></strong></article>
-    <article><i class="bi bi-hourglass-split stat-icon" aria-hidden="true"></i><span>Pending review</span><strong><?= (int) $counts['pending'] ?></strong></article>
-    <article><i class="bi bi-envelope stat-icon" aria-hidden="true"></i><span>New messages</span><strong><?= (int) $counts['messages'] ?></strong></article>
+    <?php foreach ([
+        ['news_total', 'Total news', 'bi-newspaper', 'news'],
+        ['news_draft', 'Draft news', 'bi-pencil-square', 'news?status=draft'],
+        ['news_archived', 'Archived news', 'bi-archive', 'news?status=archived'],
+        ['news_featured', 'Featured news', 'bi-star', 'news?featured=1'],
+    ] as [$key, $label, $icon, $resource]): ?>
+        <a class="admin-stat-card" href="<?= e(url('admin/' . $resource)) ?>"><i class="bi <?= e($icon) ?> stat-icon"></i><span><?= e($label) ?></span><strong><?= (int) $counts[$key] ?></strong><small>News management <i class="bi bi-arrow-up-right"></i></small></a>
+    <?php endforeach; ?>
+    <?php foreach ([['events_upcoming', 'Upcoming events', 'bi-calendar-event'], ['events_ongoing', 'Ongoing events', 'bi-broadcast'], ['events_completed', 'Completed events', 'bi-calendar-check'], ['events_draft', 'Draft events', 'bi-calendar-x']] as [$key, $label, $icon]): ?>
+        <a class="admin-stat-card" href="<?= e(url('admin/events')) ?>"><i class="bi <?= e($icon) ?> stat-icon"></i><span><?= e($label) ?></span><strong><?= (int) $counts[$key] ?></strong><small>Events management <i class="bi bi-arrow-up-right"></i></small></a>
+    <?php endforeach; ?>
+    <?php foreach ([['departments_total', 'Total departments', 'bi-building'], ['departments_inactive', 'Inactive departments', 'bi-building-x']] as [$key, $label, $icon]): ?>
+        <a class="admin-stat-card" href="<?= e(url('admin/departments')) ?>"><i class="bi <?= e($icon) ?> stat-icon"></i><span><?= e($label) ?></span><strong><?= (int) $counts[$key] ?></strong><small>Departments management <i class="bi bi-arrow-up-right"></i></small></a>
+    <?php endforeach; ?>
+    <?php foreach ([
+        ['news', 'Published news', 'bi-newspaper', 'news'],
+        ['departments', 'Departments', 'bi-building', 'departments'],
+        ['albums', 'Gallery albums', 'bi-collection', 'galleries'],
+        ['staff', 'Staff profiles', 'bi-people', 'staff'],
+        ['events', 'Upcoming events', 'bi-calendar-event', 'events'],
+        ['programmes', 'Programmes', 'bi-mortarboard', 'programmes'],
+        ['applications', 'Applications', 'bi-file-earmark-text', 'applications'],
+        ['pending', 'Pending applications', 'bi-hourglass-split', 'applications'],
+        ['messages', 'New messages', 'bi-envelope', 'messages'],
+        ['media', 'Media files', 'bi-images', 'media'],
+    ] as [$key, $label, $icon, $resource]): ?>
+        <a class="admin-stat-card" href="<?= e(url('admin/' . $resource)) ?>">
+            <i class="bi <?= e($icon) ?> stat-icon" aria-hidden="true"></i><span><?= e($label) ?></span><strong><?= (int) $counts[$key] ?></strong><small>Open module <i class="bi bi-arrow-up-right"></i></small>
+        </a>
+    <?php endforeach; ?>
 </div>
 <div class="admin-columns">
     <section class="panel">
-        <h2>Applications, last six months</h2>
+        <div class="panel-heading"><h2>Content activity</h2><span class="panel-note">Last six months</span></div>
         <canvas id="appsChart" height="140"></canvas>
+    </section>
+    <section class="panel"><div class="panel-heading"><h2>Recent events</h2><a class="text-link" href="<?= e(url('admin/events')) ?>">Manage events <i class="bi bi-arrow-right"></i></a></div><div class="recent-news-grid">
+    <?php foreach ($recentEvents as $item): ?><a class="recent-news-card" href="<?= e(url('admin/events/' . $item['id'] . '/edit')) ?>"><img src="<?= e(media_url($item['image'])) ?>" alt="" width="90" height="60" loading="lazy"><span><strong><?= e($item['title']) ?></strong><small><?= e(ucfirst($item['status'])) ?> · <?= e(format_date($item['starts_at'])) ?></small></span></a><?php endforeach; ?>
+    </div></section>
+    <section class="panel">
+        <div class="panel-heading"><h2>Recent news publications</h2><a class="text-link" href="<?= e(url('admin/news')) ?>">Manage news <i class="bi bi-arrow-right"></i></a></div>
+        <div class="recent-news-grid">
+            <?php foreach ($recentNews as $item): ?>
+                <a class="recent-news-card" href="<?= e(url('admin/news/' . $item['id'] . '/edit')) ?>">
+                    <img src="<?= e(media_url($item['image'])) ?>" alt="" width="90" height="60" loading="lazy">
+                    <span><strong><?= e($item['title']) ?></strong><small><?= e(ucfirst($item['status'])) ?> · <?= e(format_date($item['published_at'])) ?></small></span>
+                </a>
+            <?php endforeach; ?>
+        </div>
     </section>
     <section class="panel">
         <h2>Latest applications</h2>
@@ -45,8 +80,9 @@
         </tbody>
     </table>
     </div>
-    <p class="form-actions">
+    <p class="form-actions quick-actions">
         <a class="button" href="<?= e(url('admin/news/create')) ?>">New article</a>
+        <a class="button button-secondary" href="<?= e(url('admin/events/create')) ?>">New event</a>
         <a class="button" href="<?= e(url('admin/applications')) ?>">Review applications</a>
     </p>
 </section>
@@ -81,6 +117,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 data: <?= json_encode($chartSeries) ?>,
                 borderColor: '#EF233C',
                 backgroundColor: 'rgba(239,35,60,0.12)',
+                fill: true,
+                tension: 0.35
+            }, {
+                label: 'News',
+                data: <?= json_encode($newsSeries) ?>,
+                borderColor: '#104398',
+                backgroundColor: 'rgba(16,67,152,0.08)',
                 fill: true,
                 tension: 0.35
             }]

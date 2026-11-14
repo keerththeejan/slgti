@@ -17,21 +17,39 @@ final class SeoController
 
     public function sitemap(): void
     {
-        $urls = ['/', '/about', '/programmes', '/departments', '/admissions', '/apply', '/students', '/news', '/events', '/gallery', '/faq', '/contact', '/privacy', '/terms', '/accessibility'];
-        foreach (Model::fetchAll("SELECT slug, updated_at FROM pages WHERE status = 'published'") as $row) {
+        $urls = ['/', '/about', '/programmes', '/departments', '/admissions', '/apply', '/students', '/news', '/events', '/gallery', '/videos', '/testimonials', '/staff', '/facilities', '/faq', '/contact', '/privacy', '/terms', '/accessibility'];
+        foreach (Model::fetchAll("SELECT slug, updated_at FROM pages WHERE status = 'published' AND robots_index = 'index'") as $row) {
             $urls[] = '/page/' . $row['slug'];
         }
-        foreach (Model::fetchAll("SELECT slug FROM departments WHERE status = 'published'") as $row) {
-            $urls[] = '/departments/' . $row['slug'];
+        foreach (Model::fetchAll("SELECT slug, seo_slug, updated_at FROM departments WHERE status = 'published'") as $row) {
+            $urls[] = '/departments/' . ($row['seo_slug'] ?: $row['slug']);
         }
-        foreach (Model::fetchAll("SELECT slug FROM programmes WHERE status = 'published'") as $row) {
-            $urls[] = '/programmes/' . $row['slug'];
+        foreach (Model::fetchAll("SELECT slug, seo_slug FROM programmes WHERE status = 'published'") as $row) {
+            $urls[] = '/programmes/' . ($row['seo_slug'] ?: $row['slug']);
+        }
+        foreach (Model::fetchAll("SELECT slug, seo_slug FROM programme_levels WHERE status = 'published'") as $row) {
+            $urls[] = '/programme-levels/' . ($row['seo_slug'] ?: $row['slug']);
+        }
+        foreach (Model::fetchAll("SELECT slug FROM programme_requirements WHERE status = 'published' AND slug IS NOT NULL") as $row) {
+            $urls[] = '/requirements/' . $row['slug'];
         }
         foreach (Model::fetchAll("SELECT slug FROM news WHERE status = 'published'") as $row) {
             $urls[] = '/news/' . $row['slug'];
         }
         foreach (Model::fetchAll("SELECT slug FROM events WHERE status = 'published'") as $row) {
             $urls[] = '/events/' . $row['slug'];
+        }
+        foreach (Model::fetchAll("SELECT slug FROM galleries WHERE status = 'published' AND display_location IN ('gallery', 'gallery_homepage')") as $row) {
+            $urls[] = '/gallery/' . $row['slug'];
+        }
+        foreach (Model::fetchAll("SELECT slug FROM videos WHERE status = 'published' AND slug IS NOT NULL") as $row) {
+            $urls[] = '/videos/' . $row['slug'];
+        }
+        foreach (Model::fetchAll("SELECT slug FROM staff WHERE status = 'published' AND display_location IN ('directory', 'both') AND slug IS NOT NULL") as $row) {
+            $urls[] = '/staff/' . $row['slug'];
+        }
+        foreach (Model::fetchAll("SELECT slug FROM facilities WHERE status = 'published' AND display_location IN ('facilities', 'both') AND slug IS NOT NULL") as $row) {
+            $urls[] = '/facilities/' . $row['slug'];
         }
         header('Content-Type: application/xml; charset=utf-8');
         echo '<?xml version="1.0" encoding="UTF-8"?>';

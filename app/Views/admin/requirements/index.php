@@ -1,0 +1,20 @@
+<div class="news-admin-header">
+    <div><p class="eyebrow">Admissions content</p><h1>Requirements Management</h1><p class="admin-lead">Publish institution-wide and programme-specific entry requirements.</p></div>
+    <a class="button" href="<?= e(url('admin/requirements/create')) ?>"><i class="bi bi-plus-lg"></i> Add requirement</a>
+</div>
+<form class="panel news-filters" method="get">
+    <label class="news-filter-search">Search <input type="search" name="q" value="<?= e($q) ?>" placeholder="Title, category, programme or department"></label>
+    <label>Department <select name="department_id"><option value="0">All departments</option><?php foreach ($departments as $item): ?><option value="<?= (int) $item['id'] ?>" <?= $department === (int) $item['id'] ? 'selected' : '' ?>><?= e($item['name']) ?></option><?php endforeach; ?></select></label>
+    <label>Programme <select name="programme_id"><option value="0">All programmes</option><?php foreach ($programmes as $item): ?><option value="<?= (int) $item['id'] ?>" <?= $programme === (int) $item['id'] ? 'selected' : '' ?>><?= e($item['title']) ?></option><?php endforeach; ?></select></label>
+    <label>Status <select name="status"><option value="">All statuses</option><?php foreach (['published', 'draft', 'archived'] as $item): ?><option value="<?= $item ?>" <?= $status === $item ? 'selected' : '' ?>><?= ucfirst($item) ?></option><?php endforeach; ?></select></label>
+    <button class="button" type="submit"><i class="bi bi-funnel"></i> Filter</button><a class="button button-secondary" href="<?= e(url('admin/requirements')) ?>">Reset</a>
+</form>
+<section class="panel">
+    <div class="panel-heading"><h2>Requirements directory</h2><span class="panel-note"><?= (int) $pager['total'] ?> records · clear filters to reorder</span></div>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Requirement</th><th>Scope</th><th>Document</th><th>Status</th><th></th></tr></thead><tbody id="requirementsList">
+    <?php foreach ($rows as $row): ?><tr data-id="<?= (int) $row['id'] ?>"><td><span class="drag-handle"><i class="bi bi-grip-vertical"></i></span><strong><?= e($row['requirement']) ?></strong><small><?= e($row['category'] ?: 'General') ?></small></td><td><?= e($row['programme_title'] ?: ($row['department_name'] ?: 'Institution-wide')) ?></td><td><?= $row['document_path'] ? '<i class="bi bi-file-earmark-pdf"></i> Available' : 'Not attached' ?></td><td><span class="news-status status-<?= e($row['status']) ?>"><?= e(ucfirst($row['status'])) ?></span></td><td class="actions"><a href="<?= e(url('admin/requirements/' . $row['id'] . '/edit')) ?>">Edit</a><?php if ($row['slug']): ?><a href="<?= e(url('requirements/' . $row['slug'])) ?>" target="_blank" rel="noopener">View</a><?php endif; ?></td></tr><?php endforeach; ?><?php if (!$rows): ?><tr><td colspan="5">No requirements match the selected filters.</td></tr><?php endif; ?></tbody></table></div>
+</section>
+<?= render_pagination($pager, '/admin/requirements', array_filter(['q' => $q, 'department_id' => $department, 'programme_id' => $programme, 'status' => $status])) ?>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script><script>
+document.addEventListener('DOMContentLoaded', () => { const list = document.getElementById('requirementsList'); if (!list || <?= json_encode($q !== '' || $department || $programme || $status !== '' || (int) $pager['pages'] !== 1) ?>) return; new Sortable(list, {animation: 150, handle: '.drag-handle', onEnd: async () => { const response = await fetch(<?= json_encode(url('admin/requirements/reorder')) ?>, {method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '', 'Accept': 'application/json'}, body: JSON.stringify({requirements: [...list.children].map((row) => Number(row.dataset.id))})}); const result = await response.json(); if (!response.ok || !result.ok) window.alert(result.message || 'Could not save order.'); }}); });
+</script>

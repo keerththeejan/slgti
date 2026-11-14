@@ -2,6 +2,11 @@
 $phone = settings('phone', '021 492 7799');
 $email = settings('email', 'info@slgti.ac.lk');
 $location = settings('location_label', 'Kilinochchi, Sri Lanka');
+$logo = settings('site_logo', '');
+$logoSource = $logo !== '' ? media_url($logo) : asset('images/logo.svg');
+$logoWidth = max(80, min(500, (int) settings('site_logo_width', '220')));
+$logoHeight = max(24, min(180, (int) settings('site_logo_height', '52')));
+$logoAlt = settings('site_logo_alt', 'Sri Lanka German Training Institute');
 $nav = menu_tree('header');
 ?>
 <div class="topbar">
@@ -27,7 +32,7 @@ $nav = menu_tree('header');
 <header class="site-header" id="siteHeader">
     <div class="container header-inner">
         <a class="brand" href="<?= e(url('/')) ?>">
-            <img src="<?= e(asset('images/logo.svg')) ?>" alt="Sri Lanka German Training Institute" width="220" height="52">
+            <img src="<?= e($logoSource) ?>" alt="<?= e($logoAlt) ?>" width="<?= $logoWidth ?>" height="<?= $logoHeight ?>" style="max-height: <?= $logoHeight ?>px; height: auto;">
         </a>
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primaryNav">
             <span class="visually-hidden">Menu</span>

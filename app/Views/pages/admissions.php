@@ -13,7 +13,7 @@
             <h3>Entry pathways</h3>
             <ul>
                 <?php foreach ($levels as $level): ?>
-                    <li><strong><?= e($level['code']) ?> — <?= e($level['name']) ?>.</strong> <?= e($level['description']) ?></li>
+                    <li><a href="<?= e(url('programme-levels/' . ($level['seo_slug'] ?: $level['slug']))) ?>"><strong><?= e($level['code']) ?> — <?= e($level['name']) ?>.</strong></a> <?= e($level['description']) ?></li>
                 <?php endforeach; ?>
             </ul>
             <a class="btn btn-red" href="<?= e(url('apply')) ?>">Start application</a>

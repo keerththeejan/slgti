@@ -12,7 +12,7 @@ final class NewsController
     {
         $category = trim((string) ($_GET['category'] ?? ''));
         $page = max(1, (int) ($_GET['page'] ?? 1));
-        $where = "n.status = 'published'";
+        $where = "n.status = 'published' AND (n.published_at IS NULL OR n.published_at <= NOW())";
         $params = [];
         if ($category !== '') {
             $where .= ' AND c.slug = ?';
@@ -44,14 +44,14 @@ final class NewsController
         $item = Model::fetch(
             "SELECT n.*, c.name AS category_name, c.slug AS category_slug
              FROM news n LEFT JOIN news_categories c ON c.id = n.category_id
-             WHERE n.slug = ? AND n.status = 'published'",
+             WHERE n.slug = ? AND n.status = 'published' AND (n.published_at IS NULL OR n.published_at <= NOW())",
             [$slug]
         );
         if (!$item) {
             abort(404);
         }
         $related = Model::fetchAll(
-            "SELECT id, title, slug, image, published_at FROM news WHERE status = 'published' AND id != ? ORDER BY published_at DESC LIMIT 3",
+            "SELECT id, title, slug, image, published_at FROM news WHERE status = 'published' AND (published_at IS NULL OR published_at <= NOW()) AND id != ? ORDER BY published_at DESC LIMIT 3",
             [(int) $item['id']]
         );
         view('news/show', [

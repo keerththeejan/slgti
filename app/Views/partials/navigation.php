@@ -20,10 +20,9 @@
         <?php else: ?>
             <li><a href="<?= e(url('/')) ?>">Home</a></li>
             <li><a href="<?= e(url('about')) ?>">About Us</a></li>
-            <li><a href="<?= e(url('programmes')) ?>">Programmes</a></li>
-            <li><a href="<?= e(url('departments')) ?>">Departments</a></li>
-            <li><a href="<?= e(url('admissions')) ?>">Admissions</a></li>
-            <li><a href="<?= e(url('students')) ?>">Students</a></li>
+            <li class="has-sub"><a href="<?= e(url('programmes')) ?>">Programmes <i class="bi bi-chevron-down" aria-hidden="true"></i></a><ul><li><a href="<?= e(url('programmes')) ?>">All programmes</a></li><li><a href="<?= e(url('departments')) ?>">Departments</a></li></ul></li>
+            <li class="has-sub"><a href="<?= e(url('admissions')) ?>">Admissions <i class="bi bi-chevron-down" aria-hidden="true"></i></a><ul><li><a href="<?= e(url('admissions')) ?>">Admission information</a></li><li><a href="<?= e(url('apply')) ?>">Apply now</a></li></ul></li>
+            <li class="has-sub"><a href="<?= e(url('students')) ?>">Students <i class="bi bi-chevron-down" aria-hidden="true"></i></a><ul><li><a href="<?= e(url('students')) ?>">Student services</a></li><li><a href="<?= e(url('dashboard')) ?>">Institutional dashboard</a></li><li><a href="<?= e(url('faq')) ?>">FAQ</a></li></ul></li>
             <li><a href="<?= e(url('news')) ?>">News &amp; Events</a></li>
             <li><a href="<?= e(url('contact')) ?>">Contact Us</a></li>
         <?php endif; ?>

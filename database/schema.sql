@@ -14,6 +14,7 @@ DROP TABLE IF EXISTS role_permissions;
 DROP TABLE IF EXISTS permissions;
 DROP TABLE IF EXISTS media;
 DROP TABLE IF EXISTS contact_messages;
+DROP TABLE IF EXISTS application_functions;
 DROP TABLE IF EXISTS applications;
 DROP TABLE IF EXISTS gallery_images;
 DROP TABLE IF EXISTS galleries;
@@ -109,11 +110,33 @@ CREATE TABLE departments (
     head_name VARCHAR(150) NULL,
     email VARCHAR(180) NULL,
     phone VARCHAR(40) NULL,
+    seo_title VARCHAR(180) NULL,
+    meta_description VARCHAR(320) NULL,
+    meta_keywords VARCHAR(320) NULL,
+    seo_slug VARCHAR(180) NULL,
+    og_title VARCHAR(180) NULL,
+    og_description VARCHAR(320) NULL,
+    og_image VARCHAR(255) NULL,
+    twitter_image VARCHAR(255) NULL,
+    robots_index VARCHAR(10) NOT NULL DEFAULT 'index',
+    robots_follow VARCHAR(10) NOT NULL DEFAULT 'follow',
+    canonical_url VARCHAR(500) NULL,
+    structured_data JSON NULL,
+    focus_keyword VARCHAR(120) NULL,
     sort_order INT NOT NULL DEFAULT 0,
     status VARCHAR(20) NOT NULL DEFAULT 'published',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_departments_status (status, sort_order)
+    ,UNIQUE KEY uq_departments_seo_slug (seo_slug)
+) ENGINE=InnoDB;
+
+CREATE TABLE department_slug_redirects (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    department_id INT UNSIGNED NOT NULL,
+    old_slug VARCHAR(180) NOT NULL UNIQUE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_department_slug_redirect_department FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE programme_levels (
@@ -123,7 +146,41 @@ CREATE TABLE programme_levels (
     slug VARCHAR(80) NOT NULL UNIQUE,
     qualification VARCHAR(180) NOT NULL,
     description TEXT NOT NULL,
-    sort_order INT NOT NULL DEFAULT 0
+    short_description TEXT NULL,
+    learning_objectives MEDIUMTEXT NULL,
+    entry_requirements MEDIUMTEXT NULL,
+    progression_pathways MEDIUMTEXT NULL,
+    career_opportunities MEDIUMTEXT NULL,
+    duration VARCHAR(80) NULL,
+    image VARCHAR(255) NULL,
+    icon VARCHAR(80) NULL,
+    is_featured TINYINT(1) NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'published',
+    seo_slug VARCHAR(80) NULL,
+    seo_title VARCHAR(180) NULL,
+    meta_description VARCHAR(320) NULL,
+    focus_keyword VARCHAR(120) NULL,
+    canonical_url VARCHAR(500) NULL,
+    og_title VARCHAR(180) NULL,
+    og_description VARCHAR(320) NULL,
+    og_image VARCHAR(255) NULL,
+    twitter_image VARCHAR(255) NULL,
+    robots_index VARCHAR(10) NOT NULL DEFAULT 'index',
+    robots_follow VARCHAR(10) NOT NULL DEFAULT 'follow',
+    structured_data JSON NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_programme_levels_seo_slug (seo_slug),
+    INDEX idx_programme_levels_status_order (status, sort_order)
+) ENGINE=InnoDB;
+
+CREATE TABLE programme_level_slug_redirects (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    level_id INT UNSIGNED NOT NULL,
+    old_slug VARCHAR(80) NOT NULL UNIQUE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_programme_level_slug_redirect_level FOREIGN KEY (level_id) REFERENCES programme_levels(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE programmes (
@@ -138,35 +195,117 @@ CREATE TABLE programmes (
     entry_requirements MEDIUMTEXT NOT NULL,
     career_outcomes MEDIUMTEXT NULL,
     image VARCHAR(255) NULL,
+    brochure_path VARCHAR(255) NULL,
+    seo_title VARCHAR(200) NULL,
+    meta_description VARCHAR(320) NULL,
+    meta_keywords VARCHAR(320) NULL,
+    seo_slug VARCHAR(200) NULL,
+    focus_keyword VARCHAR(120) NULL,
+    canonical_url VARCHAR(500) NULL,
+    og_title VARCHAR(200) NULL,
+    og_description VARCHAR(320) NULL,
+    og_image VARCHAR(255) NULL,
+    twitter_image VARCHAR(255) NULL,
+    robots_index VARCHAR(10) NOT NULL DEFAULT 'index',
+    robots_follow VARCHAR(10) NOT NULL DEFAULT 'follow',
+    structured_data JSON NULL,
     sort_order INT NOT NULL DEFAULT 0,
     status VARCHAR(20) NOT NULL DEFAULT 'published',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_programmes_department FOREIGN KEY (department_id) REFERENCES departments(id),
     CONSTRAINT fk_programmes_level FOREIGN KEY (level_id) REFERENCES programme_levels(id),
-    INDEX idx_programmes_status (status, sort_order)
+    INDEX idx_programmes_status (status, sort_order),
+    UNIQUE KEY uq_programmes_seo_slug (seo_slug)
 ) ENGINE=InnoDB;
 
 CREATE TABLE programme_requirements (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    programme_id INT UNSIGNED NOT NULL,
+    programme_id INT UNSIGNED NULL,
     requirement VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NULL UNIQUE,
+    category VARCHAR(120) NULL,
+    department_id INT UNSIGNED NULL,
+    short_description TEXT NULL,
+    description MEDIUMTEXT NULL,
+    eligibility_criteria MEDIUMTEXT NULL,
+    educational_qualifications MEDIUMTEXT NULL,
+    required_documents MEDIUMTEXT NULL,
+    application_instructions MEDIUMTEXT NULL,
+    submission_method VARCHAR(180) NULL,
+    application_deadline DATETIME NULL,
+    contact_information VARCHAR(255) NULL,
+    image VARCHAR(255) NULL,
+    document_path VARCHAR(255) NULL,
+    is_featured TINYINT(1) NOT NULL DEFAULT 0,
     sort_order INT NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'published',
+    seo_title VARCHAR(255) NULL,
+    meta_description VARCHAR(320) NULL,
+    focus_keyword VARCHAR(120) NULL,
+    canonical_url VARCHAR(500) NULL,
+    og_title VARCHAR(255) NULL,
+    og_description VARCHAR(320) NULL,
+    og_image VARCHAR(255) NULL,
+    twitter_image VARCHAR(255) NULL,
+    robots_index VARCHAR(10) NOT NULL DEFAULT 'index',
+    robots_follow VARCHAR(10) NOT NULL DEFAULT 'follow',
+    structured_data JSON NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_requirements_programme FOREIGN KEY (programme_id) REFERENCES programmes(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE requirement_slug_redirects (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    requirement_id INT UNSIGNED NOT NULL,
+    old_slug VARCHAR(255) NOT NULL UNIQUE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_requirement_slug_redirect_requirement FOREIGN KEY (requirement_id) REFERENCES programme_requirements(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE programme_slug_redirects (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    programme_id INT UNSIGNED NOT NULL,
+    old_slug VARCHAR(200) NOT NULL UNIQUE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_programme_slug_redirect_programme FOREIGN KEY (programme_id) REFERENCES programmes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE staff (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
+    slug VARCHAR(180) NULL,
+    staff_id VARCHAR(60) NULL,
     position VARCHAR(150) NOT NULL,
+    category VARCHAR(80) NULL,
+    section VARCHAR(120) NULL,
     department_id INT UNSIGNED NULL,
     bio MEDIUMTEXT NULL,
+    qualifications TEXT NULL,
+    expertise TEXT NULL,
+    employment_status VARCHAR(30) NOT NULL DEFAULT 'active',
+    joining_date DATE NULL,
     email VARCHAR(180) NULL,
     phone VARCHAR(40) NULL,
+    office_location VARCHAR(180) NULL,
+    profile_url VARCHAR(255) NULL,
     image VARCHAR(255) NULL,
+    image_alt VARCHAR(180) NULL,
+    is_featured TINYINT(1) NOT NULL DEFAULT 0,
+    display_location VARCHAR(40) NOT NULL DEFAULT 'directory',
     sort_order INT NOT NULL DEFAULT 0,
     status VARCHAR(20) NOT NULL DEFAULT 'published',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NULL,
+    seo_title VARCHAR(180) NULL,
+    meta_description VARCHAR(320) NULL,
+    canonical_url VARCHAR(255) NULL,
+    og_title VARCHAR(180) NULL,
+    og_description VARCHAR(320) NULL,
+    og_image VARCHAR(255) NULL,
+    robots_index VARCHAR(20) NOT NULL DEFAULT 'noindex',
+    robots_follow VARCHAR(20) NOT NULL DEFAULT 'follow',
     CONSTRAINT fk_staff_department FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
@@ -258,19 +397,45 @@ CREATE TABLE menu_items (
 CREATE TABLE faqs (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     question VARCHAR(255) NOT NULL,
+    category VARCHAR(80) NULL,
+    slug VARCHAR(180) NULL UNIQUE,
     answer MEDIUMTEXT NOT NULL,
     sort_order INT NOT NULL DEFAULT 0,
-    status VARCHAR(20) NOT NULL DEFAULT 'published'
+    is_featured TINYINT(1) NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'published',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_faq_listing (status, category, sort_order)
 ) ENGINE=InnoDB;
 
 CREATE TABLE facilities (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(150) NOT NULL,
+    slug VARCHAR(180) NULL,
     summary TEXT NOT NULL,
+    category VARCHAR(80) NULL,
+    description MEDIUMTEXT NULL,
+    location VARCHAR(180) NULL,
+    capacity VARCHAR(80) NULL,
+    equipment TEXT NULL,
+    availability_status VARCHAR(30) NOT NULL DEFAULT 'available',
+    is_featured TINYINT(1) NOT NULL DEFAULT 0,
+    display_location VARCHAR(40) NOT NULL DEFAULT 'facilities',
     image VARCHAR(255) NULL,
+    image_alt VARCHAR(180) NULL,
     icon VARCHAR(80) NULL,
     sort_order INT NOT NULL DEFAULT 0,
-    status VARCHAR(20) NOT NULL DEFAULT 'published'
+    status VARCHAR(20) NOT NULL DEFAULT 'published',
+    updated_at DATETIME NULL,
+    seo_title VARCHAR(180) NULL,
+    meta_description VARCHAR(320) NULL,
+    canonical_url VARCHAR(255) NULL,
+    og_title VARCHAR(180) NULL,
+    og_description VARCHAR(320) NULL,
+    og_image VARCHAR(255) NULL,
+    robots_index VARCHAR(20) NOT NULL DEFAULT 'index',
+    robots_follow VARCHAR(20) NOT NULL DEFAULT 'follow',
+    INDEX idx_facilities_listing (status, availability_status, sort_order)
 ) ENGINE=InnoDB;
 
 CREATE TABLE sliders (
@@ -280,43 +445,112 @@ CREATE TABLE sliders (
     subtitle TEXT NOT NULL,
     title_highlight VARCHAR(180) NULL,
     image VARCHAR(255) NULL,
+    mobile_image VARCHAR(255) NULL,
+    image_alt VARCHAR(180) NULL,
     button_text VARCHAR(80) NULL,
     button_url VARCHAR(255) NULL,
     secondary_text VARCHAR(80) NULL,
     secondary_url VARCHAR(255) NULL,
+    text_alignment VARCHAR(20) NOT NULL DEFAULT 'left',
+    text_position VARCHAR(20) NOT NULL DEFAULT 'left',
+    overlay_color VARCHAR(20) NOT NULL DEFAULT '#0B5CAB',
+    overlay_opacity TINYINT UNSIGNED NOT NULL DEFAULT 35,
+    display_location VARCHAR(40) NOT NULL DEFAULT 'homepage',
     sort_order INT NOT NULL DEFAULT 0,
-    status VARCHAR(20) NOT NULL DEFAULT 'published'
+    status VARCHAR(20) NOT NULL DEFAULT 'published',
+    starts_at DATETIME NULL,
+    ends_at DATETIME NULL,
+    created_at DATETIME NULL,
+    updated_at DATETIME NULL,
+    INDEX idx_sliders_schedule (status, display_location, starts_at, ends_at, sort_order)
 ) ENGINE=InnoDB;
 
 CREATE TABLE quick_links (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(120) NOT NULL,
     subtitle VARCHAR(180) NOT NULL,
+    category VARCHAR(80) NOT NULL DEFAULT 'General',
+    link_type VARCHAR(20) NOT NULL DEFAULT 'internal',
     icon VARCHAR(80) NOT NULL,
     color VARCHAR(20) NOT NULL DEFAULT '#0B5CAB',
     url VARCHAR(255) NOT NULL,
+    target VARCHAR(20) NOT NULL DEFAULT '_self',
+    display_style VARCHAR(20) NOT NULL DEFAULT 'card',
+    display_location VARCHAR(40) NOT NULL DEFAULT 'homepage',
+    is_featured TINYINT(1) NOT NULL DEFAULT 0,
     sort_order INT NOT NULL DEFAULT 0,
-    status VARCHAR(20) NOT NULL DEFAULT 'published'
+    status VARCHAR(20) NOT NULL DEFAULT 'published',
+    created_at DATETIME NULL,
+    updated_at DATETIME NULL,
+    INDEX idx_quick_links_display (status, display_location, sort_order),
+    INDEX idx_quick_links_category (category)
 ) ENGINE=InnoDB;
 
 CREATE TABLE testimonials (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
+    slug VARCHAR(180) NULL,
     role VARCHAR(180) NOT NULL,
     quote TEXT NOT NULL,
+    profile_image VARCHAR(255) NULL,
+    image_alt VARCHAR(180) NULL,
+    designation VARCHAR(180) NULL,
+    department_id INT UNSIGNED NULL,
+    programme_id INT UNSIGNED NULL,
+    qualification VARCHAR(180) NULL,
+    graduation_year SMALLINT UNSIGNED NULL,
+    organization VARCHAR(180) NULL,
+    rating TINYINT UNSIGNED NULL,
+    approval_status VARCHAR(20) NOT NULL DEFAULT 'pending',
+    rejection_reason VARCHAR(500) NULL,
+    is_featured TINYINT(1) NOT NULL DEFAULT 0,
+    display_location VARCHAR(40) NOT NULL DEFAULT 'homepage',
     sort_order INT NOT NULL DEFAULT 0,
-    status VARCHAR(20) NOT NULL DEFAULT 'published'
+    status VARCHAR(20) NOT NULL DEFAULT 'published',
+    created_at DATETIME NULL,
+    updated_at DATETIME NULL,
+    seo_title VARCHAR(180) NULL,
+    meta_description VARCHAR(320) NULL,
+    canonical_url VARCHAR(255) NULL,
+    og_title VARCHAR(180) NULL,
+    og_description VARCHAR(320) NULL,
+    og_image VARCHAR(255) NULL,
+    robots_index VARCHAR(20) NOT NULL DEFAULT 'noindex',
+    robots_follow VARCHAR(20) NOT NULL DEFAULT 'follow',
+    INDEX idx_testimonials_listing (status, approval_status, display_location, sort_order)
 ) ENGINE=InnoDB;
 
 CREATE TABLE videos (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(180) NOT NULL,
+    slug VARCHAR(180) NULL UNIQUE,
     description TEXT NULL,
     video_url VARCHAR(255) NOT NULL,
+    provider VARCHAR(20) NOT NULL DEFAULT 'youtube',
+    video_id VARCHAR(120) NULL,
+    embed_url VARCHAR(255) NULL,
+    thumbnail VARCHAR(255) NULL,
+    duration VARCHAR(20) NULL,
     category VARCHAR(80) NULL,
+    video_date DATE NULL,
+    location VARCHAR(180) NULL,
+    credits VARCHAR(180) NULL,
+    is_featured TINYINT(1) NOT NULL DEFAULT 0,
     sort_order INT NOT NULL DEFAULT 0,
     status VARCHAR(20) NOT NULL DEFAULT 'published',
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NULL,
+    seo_title VARCHAR(180) NULL,
+    meta_description VARCHAR(320) NULL,
+    focus_keyword VARCHAR(120) NULL,
+    canonical_url VARCHAR(255) NULL,
+    og_title VARCHAR(180) NULL,
+    og_description VARCHAR(320) NULL,
+    og_image VARCHAR(255) NULL,
+    twitter_image VARCHAR(255) NULL,
+    robots_index VARCHAR(20) NOT NULL DEFAULT 'index',
+    robots_follow VARCHAR(20) NOT NULL DEFAULT 'follow',
+    INDEX idx_videos_listing (status, sort_order, id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE galleries (
@@ -324,10 +558,32 @@ CREATE TABLE galleries (
     title VARCHAR(150) NOT NULL,
     slug VARCHAR(150) NOT NULL UNIQUE,
     description TEXT NULL,
+    category VARCHAR(100) NULL,
+    event_id INT UNSIGNED NULL,
+    gallery_date DATE NULL,
+    location VARCHAR(180) NULL,
+    photographer VARCHAR(180) NULL,
     cover VARCHAR(255) NULL,
+    is_featured TINYINT(1) NOT NULL DEFAULT 0,
+    display_location VARCHAR(40) NOT NULL DEFAULT 'gallery',
     sort_order INT NOT NULL DEFAULT 0,
     status VARCHAR(20) NOT NULL DEFAULT 'published',
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NULL,
+    seo_title VARCHAR(180) NULL,
+    meta_description VARCHAR(255) NULL,
+    focus_keyword VARCHAR(120) NULL,
+    canonical_url VARCHAR(255) NULL,
+    og_title VARCHAR(180) NULL,
+    og_description VARCHAR(255) NULL,
+    og_image VARCHAR(255) NULL,
+    twitter_image VARCHAR(255) NULL,
+    robots_index VARCHAR(20) NOT NULL DEFAULT 'index',
+    robots_follow VARCHAR(20) NOT NULL DEFAULT 'follow',
+    structured_data TEXT NULL,
+    INDEX idx_galleries_listing (status, display_location, sort_order),
+    INDEX idx_galleries_event (event_id),
+    INDEX idx_galleries_category (category)
 ) ENGINE=InnoDB;
 
 CREATE TABLE gallery_images (
@@ -335,9 +591,14 @@ CREATE TABLE gallery_images (
     gallery_id INT UNSIGNED NOT NULL,
     title VARCHAR(180) NOT NULL,
     image VARCHAR(255) NOT NULL,
+    alt_text VARCHAR(180) NULL,
+    credits VARCHAR(180) NULL,
     sort_order INT NOT NULL DEFAULT 0,
     status VARCHAR(20) NOT NULL DEFAULT 'published',
-    CONSTRAINT fk_gallery_images FOREIGN KEY (gallery_id) REFERENCES galleries(id) ON DELETE CASCADE
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NULL,
+    CONSTRAINT fk_gallery_images FOREIGN KEY (gallery_id) REFERENCES galleries(id) ON DELETE CASCADE,
+    INDEX idx_gallery_images_listing (gallery_id, status, sort_order)
 ) ENGINE=InnoDB;
 
 CREATE TABLE applications (
@@ -361,6 +622,23 @@ CREATE TABLE applications (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_applications_programme FOREIGN KEY (programme_id) REFERENCES programmes(id) ON DELETE SET NULL,
     INDEX idx_applications_status (status, created_at)
+) ENGINE=InnoDB;
+
+CREATE TABLE application_functions (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    description TEXT NULL,
+    icon VARCHAR(80) NOT NULL DEFAULT 'bi-box-arrow-up-right',
+    application_type VARCHAR(80) NOT NULL DEFAULT 'External application',
+    external_url VARCHAR(500) NULL,
+    category VARCHAR(80) NULL,
+    open_new_tab TINYINT(1) NOT NULL DEFAULT 1,
+    status VARCHAR(20) NOT NULL DEFAULT 'inactive',
+    publication_status VARCHAR(20) NOT NULL DEFAULT 'draft',
+    sort_order INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_application_functions_listing (publication_status, status, sort_order)
 ) ENGINE=InnoDB;
 
 CREATE TABLE application_documents (

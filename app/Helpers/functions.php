@@ -247,10 +247,27 @@ function nav_href(string $href): string
     if ($href === '' || $href === '#') {
         return '#';
     }
+    if (preg_match('#^(javascript|data|vbscript):#i', trim($href))) {
+        return '#';
+    }
     if (preg_match('#^(https?:)?//#i', $href) || str_starts_with($href, 'mailto:') || str_starts_with($href, 'tel:')) {
         return $href;
     }
     return base_url(ltrim($href, '/'));
+}
+
+function published_quick_links(string $location): array
+{
+    static $cache = [];
+    if (!isset($cache[$location])) {
+        $cache[$location] = \App\Core\Model::fetchAll(
+            "SELECT * FROM quick_links
+             WHERE status = 'published' AND display_location IN (?, 'homepage_footer')
+             ORDER BY sort_order ASC, id ASC",
+            [$location]
+        );
+    }
+    return $cache[$location];
 }
 
 function abort(int $code): never
@@ -412,6 +429,26 @@ function upload_image(array $file): string
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
         throw new RuntimeException('Choose an image to upload.');
     }
+
+    function upload_public_document(array $file): string
+    {
+        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || ($file['size'] ?? 0) > (int) config('upload_max', 5242880)) {
+            throw new RuntimeException('Brochures must be a valid file no larger than 5 MB.');
+        }
+        $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']) ?: '';
+        if ($mime !== 'application/pdf' || file_get_contents($file['tmp_name'], false, null, 0, 5) !== '%PDF-') {
+            throw new RuntimeException('Upload a valid PDF brochure.');
+        }
+        $directory = ROOT_PATH . '/public/uploads/brochures';
+        if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) {
+            throw new RuntimeException('The brochure folder is not available.');
+        }
+        $filename = bin2hex(random_bytes(16)) . '.pdf';
+        if (!move_uploaded_file($file['tmp_name'], $directory . '/' . $filename)) {
+            throw new RuntimeException('The brochure could not be stored.');
+        }
+        return 'uploads/brochures/' . $filename;
+    }
     if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
         throw new RuntimeException('The upload could not be completed.');
     }
@@ -454,6 +491,81 @@ function upload_image(array $file): string
         'created_at' => date('Y-m-d H:i:s'),
     ]);
     return $relative;
+}
+
+function upload_favicon(array $file): array
+{
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || ($file['size'] ?? 0) > (int) config('upload_max', 5242880)) {
+        throw new RuntimeException('Favicon files must be valid and 5 MB or smaller.');
+    }
+    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']) ?: '';
+    $directory = ROOT_PATH . '/public/uploads/favicons';
+    if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) {
+        throw new RuntimeException('The favicon folder is not available.');
+    }
+    if ($mime === 'image/svg+xml') {
+        $svg = file_get_contents($file['tmp_name']);
+        if ($svg === false || strlen($svg) > 1048576 || preg_match('/<script\b|on[a-z]+\s*=|javascript:|<!DOCTYPE|<!ENTITY|xlink:href\s*=\s*["\']https?:/i', $svg)) {
+            throw new RuntimeException('The SVG favicon contains unsafe content.');
+        }
+        $filename = bin2hex(random_bytes(16)) . '.svg';
+        if (file_put_contents($directory . '/' . $filename, $svg, LOCK_EX) === false) {
+            throw new RuntimeException('The SVG favicon could not be stored.');
+        }
+        return array_fill_keys(['favicon_16', 'favicon_32', 'favicon_48', 'favicon_apple', 'favicon_android', 'favicon_large'], 'uploads/favicons/' . $filename);
+    }
+    if (!function_exists('imagecreatetruecolor')) {
+        throw new RuntimeException('Raster favicon processing is unavailable on this server.');
+    }
+    $source = match ($mime) {
+        'image/png' => @imagecreatefrompng($file['tmp_name']),
+        'image/jpeg' => @imagecreatefromjpeg($file['tmp_name']),
+        'image/webp' => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($file['tmp_name']) : false,
+        'image/gif' => @imagecreatefromgif($file['tmp_name']),
+        'image/x-icon', 'image/vnd.microsoft.icon' => @imagecreatefromstring((string) file_get_contents($file['tmp_name'])),
+        default => false,
+    };
+    if (!$source) {
+        throw new RuntimeException('Upload a valid PNG, JPEG, WEBP, GIF or safely validated SVG favicon.');
+    }
+    $width = imagesx($source);
+    $height = imagesy($source);
+    if ($width < 16 || $height < 16) {
+        imagedestroy($source);
+        throw new RuntimeException('Favicon images must be at least 16 by 16 pixels.');
+    }
+    $sizes = ['favicon_16' => 16, 'favicon_32' => 32, 'favicon_48' => 48, 'favicon_apple' => 180, 'favicon_android' => 192, 'favicon_large' => 512];
+    $paths = [];
+    foreach ($sizes as $key => $size) {
+        $canvas = imagecreatetruecolor($size, $size);
+        imagealphablending($canvas, false);
+        imagesavealpha($canvas, true);
+        $transparent = imagecolorallocatealpha($canvas, 255, 255, 255, 127);
+        imagefilledrectangle($canvas, 0, 0, $size, $size, $transparent);
+        imagecopyresampled($canvas, $source, 0, 0, 0, 0, $size, $size, $width, $height);
+        $filename = bin2hex(random_bytes(12)) . '-' . $size . '.png';
+        if (!imagepng($canvas, $directory . '/' . $filename, 6)) {
+            imagedestroy($canvas);
+            imagedestroy($source);
+            throw new RuntimeException('A favicon variant could not be generated.');
+        }
+        imagedestroy($canvas);
+        $paths[$key] = 'uploads/favicons/' . $filename;
+    }
+    imagedestroy($source);
+    return $paths;
+}
+
+function upload_slider_image(array $file): string
+{
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        throw new RuntimeException('Choose an image to upload.');
+    }
+    $dimensions = @getimagesize((string) ($file['tmp_name'] ?? ''));
+    if (!$dimensions || (int) $dimensions[0] < 640 || (int) $dimensions[1] < 240) {
+        throw new RuntimeException('Slider images must be at least 640 × 240 pixels.');
+    }
+    return upload_image($file);
 }
 
 function store_safe_image(string $source, string $mime, string $destination): bool

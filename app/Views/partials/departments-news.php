@@ -5,7 +5,7 @@
             <h2>Explore Our Departments</h2>
             <div class="home-depts">
                 <?php foreach ($departments as $department): ?>
-                    <a class="home-dept" href="<?= e(url('departments/' . $department['slug'])) ?>">
+                    <a class="home-dept" href="<?= e(url('departments/' . ($department['seo_slug'] ?: $department['slug']))) ?>">
                         <img src="<?= e(media_url($department['image'])) ?>" alt="" width="320" height="180" loading="lazy">
                         <span class="home-dept-icon"><i class="bi <?= e($department['icon'] ?: 'bi-gear') ?>"></i></span>
                         <strong><?= e($department['name']) ?></strong>

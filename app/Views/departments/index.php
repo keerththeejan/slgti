@@ -2,7 +2,7 @@
 <section class="section">
     <div class="container dept-grid">
         <?php foreach ($departments as $department): ?>
-            <a class="dept-card" href="<?= e(url('departments/' . $department['slug'])) ?>">
+            <a class="dept-card" href="<?= e(url('departments/' . ($department['seo_slug'] ?: $department['slug']))) ?>">
                 <img src="<?= e(media_url($department['image'])) ?>" alt="" loading="lazy" width="640" height="420">
                 <span class="dept-icon"><i class="bi <?= e($department['icon'] ?: 'bi-gear') ?>"></i></span>
                 <h2><?= e($department['name']) ?></h2>

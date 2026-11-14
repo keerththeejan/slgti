@@ -1,0 +1,15 @@
+INSERT IGNORE INTO settings (setting_key, setting_value, setting_group, label, field_type) VALUES
+('site_logo', '', 'logo', 'Website logo', 'file'),
+('site_logo_alt', 'Sri Lanka German Training Institute', 'logo', 'Logo alternative text', 'text'),
+('site_logo_width', '220', 'logo', 'Logo display width', 'number'),
+('site_logo_height', '52', 'logo', 'Logo maximum height', 'number'),
+('favicon_16', '', 'favicon', 'Favicon 16px', 'file'),
+('favicon_32', '', 'favicon', 'Favicon 32px', 'file'),
+('favicon_48', '', 'favicon', 'Favicon 48px', 'file'),
+('favicon_apple', '', 'favicon', 'Apple touch icon', 'file'),
+('favicon_android', '', 'favicon', 'Android icon', 'file'),
+('favicon_large', '', 'favicon', 'Large favicon', 'file'),
+('footer_logo', '', 'footer', 'Footer logo', 'file'),
+('footer_visible', '1', 'footer', 'Show footer', 'select'),
+('footer_copyright', 'Sri Lanka German Training Institute (SLGTI), Kilinochchi. All rights reserved.', 'footer', 'Copyright text', 'text'),
+('footer_website', 'https://www.slgti.ac.lk/', 'footer', 'Footer website URL', 'text');

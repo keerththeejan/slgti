@@ -35,7 +35,7 @@ $icons = [
     <title><?= e($metaTitle ?? 'Admin') ?> · SLGTI</title>
     <meta name="robots" content="noindex">
     <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
-    <link rel="icon" href="<?= e(asset('images/favicon.svg')) ?>" type="image/svg+xml">
+    <?php $adminFavicon = settings('favicon_32', ''); ?><link rel="icon" href="<?= e($adminFavicon ? media_url($adminFavicon) : asset('images/favicon.svg')) ?>" type="<?= $adminFavicon && str_ends_with($adminFavicon, '.svg') ? 'image/svg+xml' : 'image/png' ?>" sizes="32x32">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="<?= e(asset('css/admin.css')) ?>" rel="stylesheet">
@@ -46,7 +46,8 @@ $icons = [
 <div class="admin-shell">
     <aside class="admin-side" id="adminSide">
         <div class="admin-side-head">
-            <a class="admin-brand" href="<?= e(url('admin')) ?>">SLGTI <span>CMS</span></a>
+            <a class="admin-brand" href="<?= e(url('admin')) ?>"><img src="<?= e(asset('images/logo-white.svg')) ?>" alt="SLGTI" width="150" height="35"><span>CMS</span></a>
+            <button class="side-collapse" type="button" data-admin-collapse aria-label="Collapse sidebar"><i class="bi bi-layout-sidebar"></i></button>
             <button class="side-close" type="button" data-admin-close aria-label="Close menu"><i class="bi bi-x-lg"></i></button>
         </div>
         <nav aria-label="Administration">
@@ -84,6 +85,7 @@ $icons = [
     <div class="admin-main">
         <header class="admin-top">
             <button class="nav-toggle" type="button" data-admin-nav aria-controls="adminSide" aria-expanded="false" aria-label="Open menu"><i class="bi bi-list"></i></button>
+            <?php if (current_path() === '/admin'): ?><div class="admin-welcome">Welcome back, <?= e($_SESSION['user_name'] ?? 'Administrator') ?><small><?= e(date('l, d F Y')) ?></small></div><?php endif; ?>
             <nav class="admin-crumb" aria-label="Breadcrumb">
                 <ol>
                     <?php foreach ($crumbs as $index => $crumb): ?>

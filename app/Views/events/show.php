@@ -6,6 +6,7 @@
         <?php if (!empty($event['registration_url'])): ?>
             <p><a class="btn btn-red" href="<?= e(nav_href($event['registration_url'])) ?>">Register</a></p>
         <?php endif; ?>
-        <p><a class="text-link" href="<?= e(url('events')) ?>">All events</a></p>
+        <?php if (!empty($galleries)): ?><h2>Event gallery</h2><div class="video-grid"><?php foreach ($galleries as $gallery): ?><article><h3><a href="<?= e(url('gallery/' . $gallery['slug'])) ?>"><?= e($gallery['title']) ?></a></h3><p><?= (int) $gallery['image_count'] ?> photographs</p></article><?php endforeach; ?></div><?php endif; ?>
+        <p><a class="text-link" href="<?= e(url('events')) ?>">All events</a> · <a class="text-link" href="<?= e(url('events/calendar')) ?>">Calendar</a></p>
     </div>
 </section>

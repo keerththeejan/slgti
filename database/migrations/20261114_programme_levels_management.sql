@@ -1,0 +1,35 @@
+ALTER TABLE programme_levels
+    ADD COLUMN short_description TEXT NULL AFTER description,
+    ADD COLUMN learning_objectives MEDIUMTEXT NULL AFTER short_description,
+    ADD COLUMN entry_requirements MEDIUMTEXT NULL AFTER learning_objectives,
+    ADD COLUMN progression_pathways MEDIUMTEXT NULL AFTER entry_requirements,
+    ADD COLUMN career_opportunities MEDIUMTEXT NULL AFTER progression_pathways,
+    ADD COLUMN duration VARCHAR(80) NULL AFTER career_opportunities,
+    ADD COLUMN image VARCHAR(255) NULL AFTER duration,
+    ADD COLUMN icon VARCHAR(80) NULL AFTER image,
+    ADD COLUMN is_featured TINYINT(1) NOT NULL DEFAULT 0 AFTER icon,
+    ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'published' AFTER is_featured,
+    ADD COLUMN seo_slug VARCHAR(80) NULL AFTER status,
+    ADD COLUMN seo_title VARCHAR(180) NULL AFTER status,
+    ADD COLUMN meta_description VARCHAR(320) NULL AFTER seo_title,
+    ADD COLUMN focus_keyword VARCHAR(120) NULL AFTER meta_description,
+    ADD COLUMN canonical_url VARCHAR(500) NULL AFTER focus_keyword,
+    ADD COLUMN og_title VARCHAR(180) NULL AFTER canonical_url,
+    ADD COLUMN og_description VARCHAR(320) NULL AFTER og_title,
+    ADD COLUMN og_image VARCHAR(255) NULL AFTER og_description,
+    ADD COLUMN twitter_image VARCHAR(255) NULL AFTER og_image,
+    ADD COLUMN robots_index VARCHAR(10) NOT NULL DEFAULT 'index' AFTER twitter_image,
+    ADD COLUMN robots_follow VARCHAR(10) NOT NULL DEFAULT 'follow' AFTER robots_index,
+    ADD COLUMN structured_data JSON NULL AFTER robots_follow,
+    ADD COLUMN created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER structured_data,
+    ADD COLUMN updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at,
+    ADD UNIQUE KEY uq_programme_levels_seo_slug (seo_slug),
+    ADD INDEX idx_programme_levels_status_order (status, sort_order);
+
+CREATE TABLE programme_level_slug_redirects (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    level_id INT UNSIGNED NOT NULL,
+    old_slug VARCHAR(80) NOT NULL UNIQUE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_programme_level_slug_redirect_level FOREIGN KEY (level_id) REFERENCES programme_levels(id) ON DELETE CASCADE
+) ENGINE=InnoDB;

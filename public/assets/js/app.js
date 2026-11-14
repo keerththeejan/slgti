@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
         headerToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
 
+    const hero = document.querySelector('.hero');
     const slides = [...document.querySelectorAll('.hero-slide')];
     const dots = [...document.querySelectorAll('[data-hero-dot]')];
     let heroIndex = 0;
@@ -21,8 +22,25 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('[data-hero="prev"]')?.addEventListener('click', () => showHero(heroIndex - 1));
     document.querySelector('[data-hero="next"]')?.addEventListener('click', () => showHero(heroIndex + 1));
     dots.forEach((dot) => dot.addEventListener('click', () => showHero(Number(dot.dataset.heroDot))));
+    hero?.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowLeft') showHero(heroIndex - 1);
+        if (event.key === 'ArrowRight') showHero(heroIndex + 1);
+    });
+    hero?.setAttribute('tabindex', '0');
+    let heroTimer;
+    const startHero = () => { if (slides.length > 1) heroTimer = window.setInterval(() => showHero(heroIndex + 1), 7000); };
+    const stopHero = () => { if (heroTimer) window.clearInterval(heroTimer); };
+    hero?.addEventListener('mouseenter', stopHero);
+    hero?.addEventListener('mouseleave', startHero);
+    let touchStartX = 0;
+    hero?.addEventListener('touchstart', (event) => { touchStartX = event.changedTouches[0]?.screenX || 0; stopHero(); }, {passive: true});
+    hero?.addEventListener('touchend', (event) => {
+        const distance = (event.changedTouches[0]?.screenX || 0) - touchStartX;
+        if (Math.abs(distance) > 40) showHero(heroIndex + (distance < 0 ? 1 : -1));
+        startHero();
+    }, {passive: true});
     if (slides.length > 1) {
-        setInterval(() => showHero(heroIndex + 1), 7000);
+        startHero();
     }
 
     const quotes = [...document.querySelectorAll('#quoteSlider blockquote')];
