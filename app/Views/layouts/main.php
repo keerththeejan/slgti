@@ -70,7 +70,7 @@ $faviconFallback = asset('images/favicon.svg');
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
 <?php require APP_PATH . '/Views/partials/header.php'; ?>
-<main id="main">
+<main id="main" tabindex="-1">
     <?= $content ?>
 </main>
 <?php require APP_PATH . '/Views/partials/footer.php'; ?>

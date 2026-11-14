@@ -1,4 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const skipLink = document.querySelector('.skip-link');
+    const main = document.getElementById('main');
+    skipLink?.addEventListener('click', (event) => {
+        if (!main) return;
+        event.preventDefault();
+        main.focus();
+    });
+
     const headerToggle = document.querySelector('.nav-toggle');
     const nav = document.getElementById('primaryNav');
     headerToggle?.addEventListener('click', () => {
