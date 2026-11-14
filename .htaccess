@@ -1,5 +1,4 @@
 RewriteEngine On
-RewriteBase /slgti/
 
 RewriteRule ^(app|config|database|storage|routes)(/|$) - [F,L]
 
