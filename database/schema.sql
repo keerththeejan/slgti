@@ -293,6 +293,8 @@ CREATE TABLE staff (
     image VARCHAR(255) NULL,
     image_alt VARCHAR(180) NULL,
     is_featured TINYINT(1) NOT NULL DEFAULT 0,
+    is_management TINYINT(1) NOT NULL DEFAULT 0,
+    management_role VARCHAR(150) NULL,
     display_location VARCHAR(40) NOT NULL DEFAULT 'directory',
     sort_order INT NOT NULL DEFAULT 0,
     status VARCHAR(20) NOT NULL DEFAULT 'published',

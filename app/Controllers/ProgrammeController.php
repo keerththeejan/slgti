@@ -12,6 +12,20 @@ final class ProgrammeController
     {
         $level = trim((string) ($_GET['level'] ?? ''));
         $department = trim((string) ($_GET['department'] ?? ''));
+        $query = trim((string) ($_GET['q'] ?? ''));
+        $duration = trim((string) ($_GET['duration'] ?? ''));
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $levels = Model::fetchAll("SELECT * FROM programme_levels WHERE status = 'published' ORDER BY sort_order ASC");
+        $selectedLevel = null;
+        foreach ($levels as $availableLevel) {
+            if ($availableLevel['slug'] === $level) {
+                $selectedLevel = $availableLevel;
+                break;
+            }
+        }
+        if ($level !== '' && $selectedLevel === null) {
+            $level = '';
+        }
         $sql = "SELECT p.*, d.name AS department_name, d.slug AS department_slug, l.name AS level_name, l.code AS level_code, l.slug AS level_slug, l.qualification
                 FROM programmes p
                 INNER JOIN departments d ON d.id = p.department_id
@@ -26,14 +40,29 @@ final class ProgrammeController
             $sql .= ' AND d.slug = ?';
             $params[] = $department;
         }
-        $sql .= ' ORDER BY l.sort_order ASC, p.sort_order ASC';
+        if ($query !== '') {
+            $sql .= ' AND (p.title LIKE ? OR p.slug LIKE ? OR p.summary LIKE ? OR l.code LIKE ?)';
+            array_push($params, "%{$query}%", "%{$query}%", "%{$query}%", "%{$query}%");
+        }
+        if ($duration !== '') {
+            $sql .= ' AND p.duration LIKE ?';
+            $params[] = "%{$duration}%";
+        }
+        $countSql = preg_replace('/^SELECT p\.\*.*?FROM programmes p/s', 'SELECT COUNT(*) AS total FROM programmes p', $sql);
+        $total = (int) Model::fetch($countSql, $params)['total'];
+        $pager = paginate($total, $page, 9);
+        $sql .= " ORDER BY l.sort_order ASC, p.sort_order ASC, p.id ASC LIMIT {$pager['per_page']} OFFSET {$pager['offset']}";
         view('programmes/index', [
             'programmes' => Model::fetchAll($sql, $params),
-            'levels' => Model::fetchAll("SELECT * FROM programme_levels WHERE status = 'published' ORDER BY sort_order ASC"),
+            'levels' => $levels,
             'departments' => Model::fetchAll("SELECT * FROM departments WHERE status = 'published' ORDER BY sort_order ASC"),
             'activeLevel' => $level,
             'activeDepartment' => $department,
-            'metaTitle' => 'NVQ Programmes | SLGTI',
+            'query' => $query,
+            'duration' => $duration,
+            'pager' => $pager,
+            'selectedLevel' => $selectedLevel,
+            'metaTitle' => $level !== '' ? 'NVQ ' . strtoupper(str_replace('nvq-', '', $level)) . ' Programmes | SLGTI' : 'NVQ Programmes | SLGTI',
             'metaDescription' => 'Industry-oriented NVQ Level 4, 5 and 6 programmes at SLGTI Kilinochchi.',
         ]);
     }

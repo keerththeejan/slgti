@@ -116,7 +116,12 @@ document.addEventListener('DOMContentLoaded', () => {
         payload.programmes.forEach((programme) => {
             const option = document.createElement('option');
             option.value = programme.id;
-            option.textContent = programme.title;
+            option.textContent = `${programme.title} — ${programme.level_code}`;
+            option.dataset.department = programme.department_id;
+            option.dataset.level = programme.level_name || '';
+            option.dataset.code = programme.level_code || '';
+            option.dataset.duration = programme.duration || '';
+            option.dataset.qualification = programme.qualification || '';
             if (String(programme.id) === selected) option.selected = true;
             programmeSelect.appendChild(option);
         });

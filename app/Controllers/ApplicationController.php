@@ -13,12 +13,35 @@ final class ApplicationController
         if (settings('apply_open', '1') !== '1') {
             flash('error', 'Online applications are currently closed. Please watch News & Events for the next intake.');
         }
+        $programmes = Model::fetchAll(
+            "SELECT p.id, p.title, p.department_id, p.duration, p.entry_requirements,
+                    d.name AS department_name, l.name AS level_name, l.code AS level_code,
+                    l.qualification
+             FROM programmes p
+             INNER JOIN departments d ON d.id = p.department_id AND d.status = 'published'
+             INNER JOIN programme_levels l ON l.id = p.level_id AND l.status = 'published'
+             WHERE p.status = 'published'
+             ORDER BY d.sort_order ASC, p.sort_order ASC, p.title ASC"
+        );
+        $requirements = Model::fetchAll(
+            "SELECT programme_id, requirement, short_description, eligibility_criteria, required_documents
+             FROM programme_requirements
+             WHERE status = 'published' AND programme_id IS NOT NULL
+             ORDER BY sort_order ASC, id ASC"
+        );
+        $requirementsByProgramme = [];
+        foreach ($requirements as $requirement) {
+            $requirementsByProgramme[(int) $requirement['programme_id']][] = $requirement;
+        }
         view('applications/create', [
             'departments' => Model::fetchAll("SELECT id, name FROM departments WHERE status = 'published' ORDER BY sort_order"),
-            'programmes' => Model::fetchAll("SELECT id, title, department_id FROM programmes WHERE status = 'published' ORDER BY title"),
+            'programmes' => $programmes,
+            'requirementsByProgramme' => $requirementsByProgramme,
             'applicationFunctions' => Model::fetchAll("SELECT * FROM application_functions WHERE status = 'active' AND publication_status = 'published' AND external_url IS NOT NULL AND external_url <> '' ORDER BY sort_order ASC, id ASC"),
+            'applyOpen' => settings('apply_open', '1') === '1',
             'metaTitle' => 'Apply Now | SLGTI',
             'metaDescription' => 'Submit an application for an NVQ programme at the Sri Lanka German Training Institute.',
+            'metaRobots' => 'noindex, nofollow',
         ]);
     }
 
@@ -28,6 +51,7 @@ final class ApplicationController
             'reference' => $_SESSION['application_reference'] ?? '',
             'metaTitle' => 'Application received | SLGTI',
             'metaDescription' => 'Your SLGTI application has been received.',
+            'metaRobots' => 'noindex, nofollow',
         ]);
     }
 

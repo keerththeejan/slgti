@@ -326,6 +326,8 @@ function admin_resources(): array
                 'image' => ['label' => 'Photograph', 'type' => 'file'],
                 'image_alt' => ['label' => 'Photo alternative text', 'type' => 'text'],
                 'is_featured' => ['label' => 'Featured staff member', 'type' => 'checkbox'],
+                'is_management' => ['label' => 'Show in Academic Leadership', 'type' => 'checkbox'],
+                'management_role' => ['label' => 'Management role', 'type' => 'text'],
                 'display_location' => ['label' => 'Display location', 'type' => 'select', 'options' => ['directory' => 'Staff directory', 'department' => 'Department pages', 'both' => 'Directory and departments'], 'required' => true],
                 'sort_order' => ['label' => 'Sort order', 'type' => 'number'],
                 'status' => ['label' => 'Publication status', 'type' => 'select', 'options' => $published + ['archived' => 'Archived'], 'required' => true],

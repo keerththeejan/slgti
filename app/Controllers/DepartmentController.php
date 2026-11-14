@@ -37,7 +37,7 @@ final class DepartmentController
             abort(404);
         }
         $programmes = Model::fetchAll(
-            "SELECT p.*, l.name AS level_name, l.code AS level_code
+            "SELECT p.*, l.name AS level_name, l.code AS level_code, l.qualification AS level_qualification
              FROM programmes p INNER JOIN programme_levels l ON l.id = p.level_id
              WHERE p.department_id = ? AND p.status = 'published'
              ORDER BY l.sort_order ASC, p.sort_order ASC",
@@ -82,6 +82,8 @@ final class DepartmentController
             'programmes' => $programmes,
             'staff' => $staff,
             'requirements' => $requirements,
+            'programmeCount' => count($programmes),
+            'staffCount' => count($staff),
             'metaTitle' => $department['seo_title'] ?: $department['name'] . ' | SLGTI',
             'metaDescription' => $department['meta_description'] ?: $department['summary'],
             'metaKeywords' => $department['meta_keywords'] ?: '',

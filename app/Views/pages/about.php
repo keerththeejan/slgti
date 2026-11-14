@@ -1,5 +1,5 @@
 <?php $title = 'About SLGTI'; $lead = $page['excerpt']; $eyebrow = 'The institute'; require APP_PATH . '/Views/partials/page-hero.php'; ?>
-<section class="section">
+<section class="section about-intro">
     <div class="container prose-grid">
         <article class="prose"><?php if (!empty($page['image'])): ?><img class="about-featured-image" src="<?= e(media_url($page['image'])) ?>" alt="<?= e($page['image_alt'] ?: $page['title']) ?>" loading="eager"><?php endif; ?><?= $page['body'] ?></article>
         <aside class="side-card">
@@ -15,24 +15,32 @@
         </aside>
     </div>
 </section>
-<section class="section section-soft" id="principal">
-    <div class="container narrow">
+<section class="section section-soft about-principal" id="principal">
+    <div class="container about-principal-inner">
         <p class="eyebrow">Principal's message</p>
         <h2><?= e($principal['title']) ?></h2>
-        <div class="prose"><?= $principal['body'] ?></div>
+        <div class="about-principal-layout">
+            <?php if (!empty($principal['image'])): ?><img class="principal-image" src="<?= e(media_url($principal['image'])) ?>" alt="<?= e($principal['image_alt'] ?: $principal['title']) ?>" loading="lazy" width="720" height="420"><?php endif; ?>
+            <div class="prose principal-copy"><?= $principal['body'] ?></div>
+        </div>
     </div>
 </section>
-<section class="section" id="management">
+<section class="section management-section" id="management">
     <div class="container">
         <p class="eyebrow">The management</p>
         <h2>Academic leadership</h2>
         <div class="staff-grid">
             <?php foreach ($staff as $person): ?>
                 <article class="staff-card">
-                    <div class="avatar"><?= e(strtoupper(substr($person['name'], 0, 1))) ?></div>
+                    <?php if (!empty($person['image'])): ?>
+                        <img class="staff-photo" src="<?= e(media_url($person['image'])) ?>" alt="<?= e($person['image_alt'] ?: $person['name']) ?>" loading="lazy" width="104" height="104">
+                    <?php else: ?>
+                        <div class="avatar" aria-hidden="true"><?= e(strtoupper(substr($person['name'], 0, 1))) ?></div>
+                    <?php endif; ?>
                     <h3><?= e($person['name']) ?></h3>
-                    <p><?= e($person['position']) ?></p>
+                    <p><?= e($person['management_role'] ?: $person['position']) ?></p>
                     <?php if ($person['department_name']): ?><small><?= e($person['department_name']) ?></small><?php endif; ?>
+                    <?php if (!empty($person['bio'])): ?><div class="staff-bio"><?= e(trim(strip_tags($person['bio']))) ?></div><?php endif; ?>
                 </article>
             <?php endforeach; ?>
         </div>
